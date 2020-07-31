@@ -3,9 +3,17 @@ const mainController = (req, res) =>
     message: 'Welcome to my jokes API!',
   });
 
+const request = require('request');
+
 const jokeController = (req, res) =>
-  res.send({
-    message: 'This is the all jokes endpoint!',
+  request('https://api.icndb.com/jokes', (error, jokesAPIresponse) => {
+    if (error) {
+      console.log(error);
+    }
+
+    const parsedResponse = JSON.parse(jokesAPIresponse.body);
+
+    res.send({ jokes: parsedResponse.value });
   });
 
 const randomController = (req, res) =>
