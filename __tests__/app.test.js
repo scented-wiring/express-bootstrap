@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 const request = require('supertest');
 const nock = require('nock');
 const app = require('../src/app');
@@ -12,7 +16,7 @@ it('GET / should respond with a welcome message', done => {
     });
 });
 
-it('GET /jokes should respond with a message', done => {
+it('GET /jokes should respond with joke messages', done => {
   const mockResponse = {
     type: 'success',
     value: [
@@ -53,24 +57,49 @@ it('GET /jokes should respond with a message', done => {
     });
 });
 
-it('GET /jokes/random should respond with a message', done => {
+it('GET /jokes/random should respond with a random joke', done => {
+  const mockResponse = {
+    type: 'success',
+    value: {
+      id: 115,
+      joke: 'i am a random joke',
+      categories: [],
+    },
+  };
+
+  nock('https://api.icndb.com')
+    .get('/jokes/random')
+    .query({ exclude: '[explicit]' })
+    .reply(200, mockResponse);
+
   request(app)
     .get('/jokes/random')
     .then(res => {
       expect(res.statusCode).toEqual(200);
-      expect(res.body.message).toEqual('This is the random joke endpoint!');
+      expect(res.body.randomJoke).toEqual({ categories: [], id: 115, joke: 'i am a random joke' });
       done();
     });
 });
 
-it('GET /jokes/personal/:first/:last should respond with a personalised message', done => {
+it('GET /jokes/personal/:first/:last should respond with a personalised joke message', async () => {
+  const mockResponse = {
+    type: 'success',
+    value: {
+      id: 141,
+      joke: 'random joke about manchester codes',
+      categories: [],
+    },
+  };
+
+  nock('https://api.icndb.com')
+    .get('/jokes/random')
+    .query({ exclude: '[explicit]', firstName: 'manchester', lastName: 'codes' })
+    .reply(200, mockResponse);
+
   request(app)
-    .get('/jokes/personal/Tom/Hammersley')
+    .get('/jokes/personal/manchester/codes')
     .then(res => {
       expect(res.statusCode).toEqual(200);
-      expect(res.body.message).toEqual(
-        'This is the personal joke endpoint! Your name is Tom Hammersley',
-      );
-      done();
+      expect(res.body.personalJoke).toEqual(mockResponse.value);
     });
 });
