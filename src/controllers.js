@@ -10,7 +10,7 @@ const mainController = (req, res) =>
 const jokeController = (req, res) =>
   request('https://api.icndb.com/jokes', (error, jokesAPIresponse) => {
     if (error) {
-      console.log(error);
+      return res.status(error.statusCode).send({ error: error.message });
     }
 
     const parsedResponse = JSON.parse(jokesAPIresponse.body);
@@ -23,8 +23,7 @@ const randomController = (req, res) =>
     .get('https://api.icndb.com/jokes/random?exclude=[explicit]')
     .then(response => res.send({ randomJoke: response.data.value }))
     .catch(error => {
-      // eslint-disable-next-line
-  console.log(error);
+      return res.status(error.statusCode).send({ error: error.message });
     });
 
 const personalController = async (req, res) => {
@@ -37,8 +36,7 @@ const personalController = async (req, res) => {
 
     return res.send({ personalJoke: response.data.value });
   } catch (error) {
-    // eslint-disable-next-line
-    console.log(error);
+    return res.status(error.statusCode).send({ error: error.message });
   }
 };
 
